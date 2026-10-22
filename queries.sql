@@ -93,4 +93,34 @@ LIMIT 10;
 --All top 10 have sales representative assigned to them
 
 
+TASK 5: A Commercial Gap
+
+SELECT
+ c.trading_name,
+ c.segment,
+ c.province,
+ SUM(sl.line_revenue) AS total_revenue
+FROM sizwe_customers AS c
+JOIN sizwe_sales_orders AS o
+ ON c.customer_id = o.customer_id
+JOIN sizwe_sales_lines AS sl
+ ON o.order_id = sl.order_id
+WHERE c.channel = 'Wholesale'
+ AND NOT EXISTS (
+    SELECT 1
+    FROM Sizwe_trade_promotions AS p
+    WHERE p.customer_id = c.customer_id
+)
+GROUP BY
+ c.trading_name,
+ c.segment,
+ c.province
+ORDER BY
+ total_revenue DESC 
+ LIMIT 15;
+
+--Comments--
+--the top 3 accounts needs to be given a trade promotion
+--they ard generating over R63m each without the trade promotions
+--by doing this, these revenues will be protected from competitors
 

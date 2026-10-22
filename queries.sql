@@ -61,3 +61,36 @@ fiscal_year;
 --Nomsa is correct, in FY2024, the customers paid early, the average of 35.8 days
 --In FY2025, payments slowed down, to an average of 46.8 days, they now pay late
 --the business now waits roughly 11 days to get its cash
+
+
+TASK 4: The TEN accounts that matter most
+
+SELECT
+ c.trading_name,
+ c.segment,
+ c.province,
+ r.rep_name,
+SUM(sl.line_revenue) AS total_revenue
+FROM sizwe_customers AS c
+LEFT JOIN Sizwe_reps AS r
+ ON c.rep_id = r.rep_id
+JOIN Sizwe_sales_orders AS o
+ ON c.customer_id = o.customer_id
+JOIN Sizwe_sales_lines AS sl
+ ON o.order_id = sl.order_id
+WHERE o.order_date > '2024-06-30'
+GROUP BY
+ c.trading_name,
+ c.segment,
+ c.province,
+ r.rep_name
+ORDER BY
+ total_revenue DESC
+LIMIT 10;
+
+--Comments--
+--the top 10 customers by FY2025 revenue are led by Halvane retail group with R38.4m
+--All top 10 have sales representative assigned to them
+
+
+

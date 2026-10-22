@@ -124,3 +124,30 @@ ORDER BY
 --they ard generating over R63m each without the trade promotions
 --by doing this, these revenues will be protected from competitors
 
+
+TASK 6: Are sales represemtatives hitting the target?
+
+SELECT 
+    r.rep_name,
+    r.territory,
+    r.target_monthly,
+    ROUND(COALESCE(SUM(sl.line_revenue), 0) / 12, 2) AS fy2025_monthly_avg,
+    ROUND((COALESCE(SUM(sl.line_revenue), 0) / 12) / r.target_monthly * 100, 2) AS pct_of_target
+FROM sizwe_reps AS r
+LEFT JOIN sizwe_sales_orders AS o
+    ON r.rep_id = o.rep_id
+LEFT JOIN sizwe_sales_lines AS sl
+    ON o.order_id = sl.order_id
+    AND o.order_date > '2024-06-30'
+GROUP BY 
+    r.rep_name,
+    r.territory,
+    r.target_monthly
+ORDER BY 
+    pct_of_target DESC;
+
+--comments--
+-- There is a huge difference in performance. The top rep (Karabo van Wyk) 
+-- is hitting over 250% of target, while others at the bottom are at 0%. 
+-- The business should investigate why some territories are overperforming 
+-- while others are missing their targets.

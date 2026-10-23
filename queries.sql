@@ -151,3 +151,33 @@ ORDER BY
 -- is hitting over 250% of target, while others at the bottom are at 0%. 
 -- The business should investigate why some territories are overperforming 
 -- while others are missing their targets.
+
+
+-- TASK 7: The shape of the year
+
+SELECT 
+    DATE_TRUNC('month', o.order_date) AS sales_month,
+    SUM(sl.line_revenue) AS revenue,
+    
+    LAG(SUM(sl.line_revenue)) OVER (ORDER BY DATE_TRUNC('month', o.order_date)) AS previous_month_revenue,
+    
+    ROUND(
+        (SUM(sl.line_revenue) - LAG(SUM(sl.line_revenue)) OVER (ORDER BY DATE_TRUNC('month', o.order_date))) 
+        / LAG(SUM(sl.line_revenue)) OVER (ORDER BY DATE_TRUNC('month', o.order_date)) * 100
+    , 2) AS pct_change_from_prev_month,
+    
+    ROUND(
+        AVG(SUM(sl.line_revenue)) OVER (ORDER BY DATE_TRUNC('month', o.order_date) ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+    , 2) AS rolling_3_month_avg
+
+FROM sizwe_sales_orders AS o
+JOIN sizwe_sales_lines AS sl
+    ON o.order_id = sl.order_id
+GROUP BY 
+    DATE_TRUNC('month', o.order_date)
+ORDER BY 
+    sales_month ASC;
+
+-- Comments--
+-- There is a clear seasonal pattern where revenue drops sharply in December 
+-- (down 13% in Dec 2023) and bounces back in January

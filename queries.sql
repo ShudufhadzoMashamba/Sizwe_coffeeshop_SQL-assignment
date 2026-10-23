@@ -181,3 +181,49 @@ ORDER BY
 -- Comments--
 -- There is a clear seasonal pattern where revenue drops sharply in December 
 -- (down 13% in Dec 2023) and bounces back in January
+
+
+TASK 8: Why has the margins moved?
+
+WITH yearly_margins AS (
+    SELECT 
+        p.product_line,
+        
+        -- FY2024 Calculations
+        SUM(CASE WHEN o.order_date <= '2024-06-30' THEN sl.line_revenue ELSE 0 END) AS fy2024_rev,
+        SUM(CASE WHEN o.order_date <= '2024-06-30' THEN (sl.line_revenue - (sl.units * p.unit_cost)) ELSE 0 END) / 
+        NULLIF(SUM(CASE WHEN o.order_date <= '2024-06-30' THEN sl.line_revenue ELSE 0 END), 0) * 100 AS fy2024_margin,
+
+        -- FY2025 Calculations
+        SUM(CASE WHEN o.order_date > '2024-06-30' THEN sl.line_revenue ELSE 0 END) AS fy2025_rev,
+        SUM(CASE WHEN o.order_date > '2024-06-30' THEN (sl.line_revenue - (sl.units * p.unit_cost)) ELSE 0 END) / 
+        NULLIF(SUM(CASE WHEN o.order_date > '2024-06-30' THEN sl.line_revenue ELSE 0 END), 0) * 100 AS fy2025_margin
+
+    FROM sizwe_sales_lines AS sl
+    JOIN sizwe_products AS p
+        ON sl.sku = p.sku
+    JOIN sizwe_sales_orders AS o
+        ON sl.order_id = o.order_id
+    GROUP BY 
+        p.product_line
+)
+SELECT 
+    product_line,
+    ROUND(fy2024_rev, 2) AS fy2024_revenue,
+    ROUND(fy2024_margin, 2) AS fy2024_margin_pct,
+    ROUND(fy2024_rev / SUM(fy2024_rev) OVER () * 100, 2) AS fy2024_rev_share_pct,
+    
+    ROUND(fy2025_rev, 2) AS fy2025_revenue,
+    ROUND(fy2025_margin, 2) AS fy2025_margin_pct,
+    ROUND(fy2025_rev / SUM(fy2025_rev) OVER () * 100, 2) AS fy2025_rev_share_pct
+
+FROM yearly_margins
+ORDER BY 
+    fy2025_rev DESC;
+
+--Comments--
+--The company sold more of its lowest-margin product, Bulk Commercial 
+-- (margin 18.9%). Bulk Commercial's share of total revenue grew from 25.02% in FY2024 
+-- to 33.65% in FY2025. Meanwhile, higher-margin products like Single Origin (margin 44%) 
+-- saw their share drop from 19.45% to 17.57%. Because the low-margin product now makes up 
+-- a third of all revenue, it has dragged the company's total average margin down.

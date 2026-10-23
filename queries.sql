@@ -125,7 +125,7 @@ ORDER BY
 --by doing this, these revenues will be protected from competitors
 
 
-TASK 6: Are sales represemtatives hitting the target?
+TASK 6: Are sales representatives hitting the target?
 
 SELECT 
     r.rep_name,

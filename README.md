@@ -1,4 +1,4 @@
-# Sizwe Coffee: Year-End SQL Analysis
+# Sizwe Coffee: SQL Analysis
 
 ## Project Overview
 This repository contains the SQL analysis for the Sizwe Coffee year-end review. The purpose of this project was to answer eight specific business questions posed by the Financial Director (Nomsa Dlamini) and the National Sales Manager (Bongani Twala). The analysis explores channel performance, product profitability, debt collection slowdowns, sales rep targets, seasonal trends, and the sudden drop in the company's gross margin.
